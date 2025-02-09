@@ -85,15 +85,29 @@ void vkstats_device_builder_build(vkstats_device_builder* builder, vkstats_devic
     result = vkCreateDevice(builder->physical_device, &create_info, NULL, &device->device);
     check_result(result, "Could not create device!");
 
-    uint32_t counts[MAX_QUEUE_FAMILIES] = { 0 };
+    device->queue_count = builder->queue_count;
+
     for (uint32_t i = 0; i < builder->queue_count; i++)
     {
-        vkGetDeviceQueue(device->device, queue_create_infos[i].queueFamilyIndex, counts[i], &device->queues[i]);
-        counts[i]++;
+        vkGetDeviceQueue(device->device, queue_create_infos[i].queueFamilyIndex, 0, &device->queues[i]);
+    }
+
+    VkCommandPoolCreateInfo command_pool_ci = { 0 };
+    command_pool_ci.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    for (uint32_t i = 0; i < builder->queue_count; i++)
+    {
+        command_pool_ci.queueFamilyIndex = queue_create_infos[i].queueFamilyIndex;
+        result = vkCreateCommandPool(device->device, &command_pool_ci, NULL, &device->command_pools[i]);
+        check_result(result, "Failed to create command pool!");
     }
 }
 
 void vkstats_device_destroy(vkstats_device* device)
 {
+    for (uint32_t i = 0; i < device->queue_count; i++)
+    {
+        vkDestroyCommandPool(device->device, device->command_pools[i], NULL);
+    }
+
     vkDestroyDevice(device->device, NULL);
 }

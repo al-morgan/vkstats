@@ -9,9 +9,10 @@
 
 typedef struct
 {
-    VkDevice    device;
-    VkQueue     queues[MAX_QUEUES];
-    uint32_t    queue_count;
+    VkDevice        device;
+    VkQueue         queues[MAX_QUEUES];
+    uint32_t        queue_count;
+    VkCommandPool   command_pools[MAX_POOLS];
 } vkstats_device;
 
 typedef struct

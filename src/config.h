@@ -5,5 +5,6 @@
 #define MAX_PHYSICAL_DEVICES 2
 #define MAX_QUEUE_FAMILIES 10
 #define MAX_QUEUES 2
+#define MAX_POOLS MAX_QUEUES
 
 #endif
