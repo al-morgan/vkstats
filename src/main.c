@@ -118,8 +118,8 @@ int main(int argc, char** argv)
         vkDestroyBuffer(device.device, destination_buffer, NULL);
     }
 
-    vkDestroySemaphore(device.device, &starter_pistol, NULL);
-    vkDestroySemaphore(device.device, &finish_line, NULL);
+    vkDestroySemaphore(device.device, starter_pistol, NULL);
+    vkDestroySemaphore(device.device, finish_line, NULL);
 
     vkstats_device_destroy(&device);
     vkstats_instance_destroy(&instance);
