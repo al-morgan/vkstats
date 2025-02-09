@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "windows.h"
 #include "vulkan/vulkan.h"
 
 #include "instance.h"
@@ -30,6 +31,12 @@ int main(int argc, char** argv)
     vkstats_device_builder_add_queue(&device_builder, VK_QUEUE_TRANSFER_BIT);
     vkstats_device_builder_build(&device_builder, &device);
 
+
+    LARGE_INTEGER frequency;
+    
+    QueryPerformanceFrequency(&frequency);
+    printf("Performance frequency: %d\n", (int)frequency.QuadPart);
+
     VkCommandBuffer command_buffer;
     VkBuffer source_buffer;
     VkBuffer destination_buffer;
@@ -37,6 +44,8 @@ int main(int argc, char** argv)
     VkDeviceMemory destination_memory;
     uint32_t size = 12;
     VkResult result;
+    VkSemaphore starter_pistol;
+    VkSemaphore finish_line;
 
     VkCommandBufferAllocateInfo cb_ci = { 0 };
     cb_ci.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -44,6 +53,13 @@ int main(int argc, char** argv)
     cb_ci.commandPool = device.command_pools[0];
     result = vkAllocateCommandBuffers(device.device, &cb_ci, &command_buffer);
     check_result(result, "Could not allocate command buffer!");
+
+    VkSemaphoreCreateInfo s_ci = { 0 };
+    s_ci.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    result = vkCreateSemaphore(device.device, &s_ci, NULL, &starter_pistol);
+    check_result(result, "Could not create semaphore!");
+    result = vkCreateSemaphore(device.device, &s_ci, NULL, &finish_line);
+    check_result(result, "Could not create semaphore!");
 
     for (uint32_t i = 0; i < 1000; i++)
     {
