@@ -5,8 +5,9 @@
 
 typedef struct
 {
-    VkPhysicalDevice physical_device;
-    VkPhysicalDeviceProperties properties;
+    VkPhysicalDevice                    physical_device;
+    VkPhysicalDeviceProperties          properties;
+    VkPhysicalDeviceMemoryProperties    memory_properties;
 } vkstats_physical_device;
 
 /* vkstats_physical_device_get()

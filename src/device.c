@@ -5,8 +5,9 @@
 #include "config.h"
 #include "device.h"
 #include "util.h"
+#include "physical_device.h"
 
-void vkstats_device_builder_init(vkstats_device_builder* builder, VkPhysicalDevice physical_device)
+void vkstats_device_builder_init(vkstats_device_builder* builder, vkstats_physical_device* physical_device)
 {
     clear_struct(builder);
     builder->physical_device = physical_device;
@@ -33,14 +34,14 @@ void vkstats_device_builder_build(vkstats_device_builder* builder, vkstats_devic
     VkQueueFamilyProperties queue_family_properties[MAX_QUEUE_FAMILIES];
     VkDeviceQueueCreateInfo queue_create_infos[MAX_QUEUES] = { 0 };
 
-    vkGetPhysicalDeviceQueueFamilyProperties(builder->physical_device, &queue_family_property_count, NULL);
+    vkGetPhysicalDeviceQueueFamilyProperties(builder->physical_device->physical_device, &queue_family_property_count, NULL);
 
     if (queue_family_property_count > MAX_QUEUE_FAMILIES)
     {
         fatal_error("Max queue families is too small!");
     }
 
-    vkGetPhysicalDeviceQueueFamilyProperties(builder->physical_device, &queue_family_property_count, queue_family_properties);
+    vkGetPhysicalDeviceQueueFamilyProperties(builder->physical_device->physical_device, &queue_family_property_count, queue_family_properties);
 
     queue_create_infos[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 
@@ -82,7 +83,7 @@ void vkstats_device_builder_build(vkstats_device_builder* builder, vkstats_devic
     create_info.pQueueCreateInfos = queue_create_infos;
     create_info.queueCreateInfoCount = builder->queue_count;
 
-    result = vkCreateDevice(builder->physical_device, &create_info, NULL, &device->device);
+    result = vkCreateDevice(builder->physical_device->physical_device, &create_info, NULL, &device->device);
     check_result(result, "Could not create device!");
 
     device->queue_count = builder->queue_count;
@@ -90,6 +91,11 @@ void vkstats_device_builder_build(vkstats_device_builder* builder, vkstats_devic
     for (uint32_t i = 0; i < builder->queue_count; i++)
     {
         vkGetDeviceQueue(device->device, queue_create_infos[i].queueFamilyIndex, 0, &device->queues[i]);
+    }
+
+    for (uint32_t i = 0; i < builder->queue_count; i++)
+    {
+        device->queue_family_indices[i] = queue_create_infos[i].queueFamilyIndex;
     }
 
     VkCommandPoolCreateInfo command_pool_ci = { 0 };
@@ -100,6 +106,10 @@ void vkstats_device_builder_build(vkstats_device_builder* builder, vkstats_devic
         result = vkCreateCommandPool(device->device, &command_pool_ci, NULL, &device->command_pools[i]);
         check_result(result, "Failed to create command pool!");
     }
+
+    //for(uint32_t i = 0; i < builder->physical_device->memory_properties)
+
+
 }
 
 void vkstats_device_destroy(vkstats_device* device)

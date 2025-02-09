@@ -6,21 +6,25 @@
 #include "vulkan/vulkan.h"
 
 #include "config.h"
+#include "physical_device.h"
 
 typedef struct
 {
     VkDevice        device;
     VkQueue         queues[MAX_QUEUES];
     uint32_t        queue_count;
+    uint32_t        queue_family_indices[MAX_QUEUES];
     VkCommandPool   command_pools[MAX_POOLS];
+    uint32_t        device_local_memory_index;
+    uint32_t        host_visible_memory_index;
 } vkstats_device;
 
 typedef struct
 {
-    VkDevice            device;
-    VkPhysicalDevice    physical_device;
-    VkQueueFlags        queues[MAX_QUEUES];
-    uint32_t            queue_count;
+    VkDevice                    device;
+    vkstats_physical_device*    physical_device;
+    VkQueueFlags                queues[MAX_QUEUES];
+    uint32_t                    queue_count;
 } vkstats_device_builder;
 
 /* vkstats_device_builder_init()
@@ -30,7 +34,7 @@ typedef struct
 * builder: the builder to initialize.
 * physical_device: the physical device to create the device for.
 */
-void vkstats_device_builder_init(vkstats_device_builder* builder, VkPhysicalDevice physical_device);
+void vkstats_device_builder_init(vkstats_device_builder* builder, vkstats_physical_device* physical_device);
 
 /* vkstats_device_builder_add_queue()
 * 

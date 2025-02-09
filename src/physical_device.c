@@ -38,4 +38,5 @@ void vkstats_physical_device_get(vkstats_physical_device* physical_device, VkIns
     }
 
     vkGetPhysicalDeviceProperties(physical_device->physical_device, &physical_device->properties);
+    vkGetPhysicalDeviceMemoryProperties(physical_device->physical_device, &physical_device->memory_properties);
 }
