@@ -103,6 +103,7 @@ void vkstats_device_builder_build(vkstats_device_builder* builder, vkstats_devic
     for (uint32_t i = 0; i < builder->queue_count; i++)
     {
         command_pool_ci.queueFamilyIndex = queue_create_infos[i].queueFamilyIndex;
+        command_pool_ci.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         result = vkCreateCommandPool(device->device, &command_pool_ci, NULL, &device->command_pools[i]);
         check_result(result, "Failed to create command pool!");
     }

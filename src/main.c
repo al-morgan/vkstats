@@ -45,42 +45,62 @@ int main(int argc, char** argv)
     result = vkAllocateCommandBuffers(device.device, &cb_ci, &command_buffer);
     check_result(result, "Could not allocate command buffer!");
 
-    VkBufferCreateInfo b_ci = { 0 };
-    b_ci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    b_ci.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-    b_ci.pQueueFamilyIndices = &device.queue_family_indices[0];
-    b_ci.queueFamilyIndexCount = 1;
-    b_ci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    b_ci.size = size;
-    result = vkCreateBuffer(device.device, &b_ci, NULL, &source_buffer);
-    check_result(result, "Could not create buffer!");
+    for (uint32_t i = 0; i < 1000; i++)
+    {
+        size += 4;
 
-    b_ci.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-    result = vkCreateBuffer(device.device, &b_ci, NULL, &destination_buffer);
-    check_result(result, "Could not create buffer!");
+        VkBufferCreateInfo b_ci = { 0 };
+        b_ci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        b_ci.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        b_ci.pQueueFamilyIndices = &device.queue_family_indices[0];
+        b_ci.queueFamilyIndexCount = 1;
+        b_ci.size = size;
+        b_ci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        result = vkCreateBuffer(device.device, &b_ci, NULL, &source_buffer);
+        check_result(result, "Could not create buffer!");
 
-    VkMemoryAllocateInfo m_ai = { 0 };
-    m_ai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    m_ai.allocationSize = size;
-    m_ai.memoryTypeIndex = device.host_visible_memory_index;
-    result = vkAllocateMemory(device.device, &m_ai, NULL, &source_memory);
-    check_result(result, "Could not allocate memory!");
+        b_ci.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        result = vkCreateBuffer(device.device, &b_ci, NULL, &destination_buffer);
+        check_result(result, "Could not create buffer!");
 
-    m_ai.memoryTypeIndex = device.device_local_memory_index;
-    result = vkAllocateMemory(device.device, &m_ai, NULL, &destination_memory);
-    check_result(result, "Could not allocate memory!");
+        VkMemoryAllocateInfo m_ai = { 0 };
+        m_ai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        m_ai.allocationSize = size;
+        m_ai.memoryTypeIndex = device.host_visible_memory_index;
+        result = vkAllocateMemory(device.device, &m_ai, NULL, &source_memory);
+        check_result(result, "Could not allocate memory!");
 
-    result = vkBindBufferMemory(device.device, source_buffer, source_memory, 0);
-    check_result(result, "Could not bind buffer memory!");
-    result = vkBindBufferMemory(device.device, destination_buffer, destination_memory, 0);
-    check_result(result, "Could not bind buffer memory!");
+        m_ai.memoryTypeIndex = device.device_local_memory_index;
+        result = vkAllocateMemory(device.device, &m_ai, NULL, &destination_memory);
+        check_result(result, "Could not allocate memory!");
 
-    vkFreeMemory(device.device, source_memory, NULL);
-    vkFreeMemory(device.device, destination_memory, NULL);
-    vkDestroyBuffer(device.device, source_buffer, NULL);
-    vkDestroyBuffer(device.device, destination_buffer, NULL);
+        result = vkBindBufferMemory(device.device, source_buffer, source_memory, 0);
+        check_result(result, "Could not bind buffer memory!");
+        result = vkBindBufferMemory(device.device, destination_buffer, destination_memory, 0);
+        check_result(result, "Could not bind buffer memory!");
 
+        VkCommandBufferBeginInfo cb_bi = { 0 };
+        cb_bi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        cb_bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
+        vkBeginCommandBuffer(command_buffer, &cb_bi);
+
+        vkEndCommandBuffer(command_buffer);
+
+        VkSubmitInfo si = { 0 };
+        si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        si.pCommandBuffers = &command_buffer;
+        si.commandBufferCount = 1;
+        
+        vkQueueSubmit(device.queues[0], 1, &si, VK_NULL_HANDLE);
+
+        vkDeviceWaitIdle(device.device);
+
+        vkFreeMemory(device.device, source_memory, NULL);
+        vkFreeMemory(device.device, destination_memory, NULL);
+        vkDestroyBuffer(device.device, source_buffer, NULL);
+        vkDestroyBuffer(device.device, destination_buffer, NULL);
+    }
 
     vkstats_device_destroy(&device);
     vkstats_instance_destroy(&instance);
