@@ -4,10 +4,10 @@
 
 #include "vulkan/vulkan.h"
 
-#define MAX_INSTANCE_LAYER_PROPERTIES 13
-#define MAX_PHYSICAL_DEVICES 2
+#include "config.h"
+#include "device.h"
+#include "util.h"
 
-#define array_length(x) (sizeof(x) / sizeof(x[0]))
 
 void fatal_error(const char* message);
 void check_result(VkResult result, const char* message);
@@ -37,35 +37,22 @@ int main(int argc, char** argv)
     vkGetPhysicalDeviceProperties(physical_device, &physical_device_properties);
     printf("Using physical device: %s\n", physical_device_properties.deviceName);
 
+    vkstats_device_builder device_builder;
+    vkstats_device device;
+
+    vkstats_device_builder_init(&device_builder, physical_device);
+    vkstats_device_builder_add_queue(&device_builder, VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_TRANSFER_BIT);
+    vkstats_device_builder_add_queue(&device_builder, VK_QUEUE_TRANSFER_BIT);
+    vkstats_device_builder_build(&device_builder, &device);
+
+    for (uint32_t i = 0; i < 2; i++)
+    {
+        printf("%p\n", device.queues[i]);
+    }
+
+    vkstats_device_destroy(&device);
     destroy_messenger(instance, messenger);
     destroy_instance(instance);
-}
-
-/* fatal_error()
-* 
-* Displays a message and aborts the application.
-* 
-* message: the message to display.
-*/
-void fatal_error(const char* message)
-{
-    printf("%s\n", message);
-    exit(-1);
-}
-
-/* check_result()
-* 
-* Aborts the application if a result is not VK_SUCCESS.
-* 
-* result: the result to check.
-* message: the message to display if the check fails.
-*/
-void check_result(VkResult result, const char *message)
-{
-    if (result != VK_SUCCESS)
-    {
-        fatal_error(message);
-    }
 }
 
 /* debug_messenger()
@@ -113,6 +100,7 @@ VkDebugUtilsMessengerCreateInfoEXT get_messenger_create_info(void)
 */
 void check_layer(const char* layer_name)
 {
+    uint32_t i;
     VkResult result;
     uint32_t property_count;
     VkLayerProperties properties[MAX_INSTANCE_LAYER_PROPERTIES];
@@ -127,7 +115,7 @@ void check_layer(const char* layer_name)
     result = vkEnumerateInstanceLayerProperties(&property_count, properties);
     check_result(result, "Could not enumerate instance layer properties!");
 
-    for (uint32_t i = 0; i < property_count; i++)
+    for (i = 0; i < property_count; i++)
     {
         if (strcmp(layer_name, properties[i].layerName) == 0)
         {
@@ -148,14 +136,15 @@ static VkInstance create_instance(void)
 {
     VkResult result;
     VkInstance instance;
+    VkDebugUtilsMessengerCreateInfoEXT debug_utils;
+    VkInstanceCreateInfo instance_ci = { 0 };
         
-    VkDebugUtilsMessengerCreateInfoEXT debug_utils = get_messenger_create_info();
+    debug_utils = get_messenger_create_info();
     const char* enabled_extensions[] = { "VK_EXT_debug_utils" };
     const char* enabled_layers[] = { "VK_LAYER_KHRONOS_validation" };
 
     check_layer("VK_LAYER_KHRONOS_validation");
 
-    VkInstanceCreateInfo instance_ci = { 0 };
     instance_ci.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instance_ci.pNext = &debug_utils;
     instance_ci.enabledLayerCount = array_length(enabled_layers);
@@ -191,9 +180,11 @@ static VkDebugUtilsMessengerEXT create_messenger(VkInstance instance)
 {
     VkResult result;
     VkDebugUtilsMessengerEXT messenger;
+    VkDebugUtilsMessengerCreateInfoEXT debug_utils;
+    PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
     
-    VkDebugUtilsMessengerCreateInfoEXT debug_utils = get_messenger_create_info();
-    PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    debug_utils = get_messenger_create_info();
+    vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     result = vkCreateDebugUtilsMessengerEXT(instance, &debug_utils, NULL, &messenger);
     check_result(result, "Could not create debug utils messenger!");
 
@@ -209,7 +200,9 @@ static VkDebugUtilsMessengerEXT create_messenger(VkInstance instance)
 */
 static void destroy_messenger(VkInstance instance, VkDebugUtilsMessengerEXT messenger)
 {
-    PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+    PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
+
+    vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     vkDestroyDebugUtilsMessengerEXT(instance, messenger, NULL);
 }
 
@@ -245,3 +238,4 @@ static VkPhysicalDevice get_physical_device(VkInstance instance, uint32_t device
     fatal_error("Invalid physical device!");
     return VK_NULL_HANDLE;
 }
+
