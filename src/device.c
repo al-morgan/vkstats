@@ -107,8 +107,30 @@ void vkstats_device_builder_build(vkstats_device_builder* builder, vkstats_devic
         check_result(result, "Failed to create command pool!");
     }
 
-    //for(uint32_t i = 0; i < builder->physical_device->memory_properties)
+    device->device_local_memory_index = UINT_MAX;
+    device->host_visible_memory_index = UINT_MAX;
 
+    for (uint32_t i = 0; i < builder->physical_device->memory_properties.memoryTypeCount; i++)
+    {
+        VkMemoryPropertyFlags flags = builder->physical_device->memory_properties.memoryTypes[i].propertyFlags;
+
+        if ((flags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) && !(flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
+        {
+            device->device_local_memory_index = i;
+        }
+        else if (!(flags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) 
+               && (flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+               && (flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+               && !(flags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT))
+        {
+            device->host_visible_memory_index = i;
+        }
+    }
+
+    if (device->device_local_memory_index == UINT_MAX || device->host_visible_memory_index == UINT_MAX)
+    {
+        fatal_error("Could not find necessary memory types!");
+    }
 
 }
 
