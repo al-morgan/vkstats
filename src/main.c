@@ -7,9 +7,6 @@
 #define MAX_INSTANCE_LAYER_PROPERTIES 13
 #define MAX_PHYSICAL_DEVICES 2
 
-#define TRUE 1
-#define FALSE 0
-
 #define array_length(x) (sizeof(x) / sizeof(x[0]))
 
 void fatal_error(const char* message);
@@ -29,16 +26,12 @@ static VkPhysicalDevice get_physical_device(VkInstance instance, uint32_t device
 */
 int main(int argc, char** argv)
 {
-    VkInstance instance;
-    VkDebugUtilsMessengerEXT messenger;
-    VkPhysicalDevice physical_device;
-
     argc; argv;
 
-    instance = create_instance();
-    messenger = create_messenger(instance);
+    VkInstance instance = create_instance();
+    VkDebugUtilsMessengerEXT messenger = create_messenger(instance);
 
-    physical_device = get_physical_device(instance, 0);
+    VkPhysicalDevice physical_device = get_physical_device(instance, 0);
 
     VkPhysicalDeviceProperties physical_device_properties;
     vkGetPhysicalDeviceProperties(physical_device, &physical_device_properties);
@@ -120,7 +113,6 @@ VkDebugUtilsMessengerCreateInfoEXT get_messenger_create_info(void)
 */
 void check_layer(const char* layer_name)
 {
-    uint32_t i;
     VkResult result;
     uint32_t property_count;
     VkLayerProperties properties[MAX_INSTANCE_LAYER_PROPERTIES];
@@ -135,7 +127,7 @@ void check_layer(const char* layer_name)
     result = vkEnumerateInstanceLayerProperties(&property_count, properties);
     check_result(result, "Could not enumerate instance layer properties!");
 
-    for (i = 0; i < property_count; i++)
+    for (uint32_t i = 0; i < property_count; i++)
     {
         if (strcmp(layer_name, properties[i].layerName) == 0)
         {
@@ -156,15 +148,14 @@ static VkInstance create_instance(void)
 {
     VkResult result;
     VkInstance instance;
-    VkDebugUtilsMessengerCreateInfoEXT debug_utils;
-    VkInstanceCreateInfo instance_ci = { 0 };
         
-    debug_utils = get_messenger_create_info();
+    VkDebugUtilsMessengerCreateInfoEXT debug_utils = get_messenger_create_info();
     const char* enabled_extensions[] = { "VK_EXT_debug_utils" };
     const char* enabled_layers[] = { "VK_LAYER_KHRONOS_validation" };
 
     check_layer("VK_LAYER_KHRONOS_validation");
 
+    VkInstanceCreateInfo instance_ci = { 0 };
     instance_ci.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instance_ci.pNext = &debug_utils;
     instance_ci.enabledLayerCount = array_length(enabled_layers);
@@ -200,11 +191,9 @@ static VkDebugUtilsMessengerEXT create_messenger(VkInstance instance)
 {
     VkResult result;
     VkDebugUtilsMessengerEXT messenger;
-    VkDebugUtilsMessengerCreateInfoEXT debug_utils;
-    PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
     
-    debug_utils = get_messenger_create_info();
-    vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    VkDebugUtilsMessengerCreateInfoEXT debug_utils = get_messenger_create_info();
+    PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     result = vkCreateDebugUtilsMessengerEXT(instance, &debug_utils, NULL, &messenger);
     check_result(result, "Could not create debug utils messenger!");
 
@@ -220,9 +209,7 @@ static VkDebugUtilsMessengerEXT create_messenger(VkInstance instance)
 */
 static void destroy_messenger(VkInstance instance, VkDebugUtilsMessengerEXT messenger)
 {
-    PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
-
-    vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+    PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     vkDestroyDebugUtilsMessengerEXT(instance, messenger, NULL);
 }
 
