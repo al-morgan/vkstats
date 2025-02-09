@@ -5,6 +5,7 @@
 #include "instance.h"
 #include "physical_device.h"
 #include "device.h"
+#include "util.h"
 
 /* main
 * 
@@ -29,44 +30,55 @@ int main(int argc, char** argv)
     vkstats_device_builder_add_queue(&device_builder, VK_QUEUE_TRANSFER_BIT);
     vkstats_device_builder_build(&device_builder, &device);
 
-    printf("%d %d\n", device.device_local_memory_index, device.host_visible_memory_index);
+    VkCommandBuffer command_buffer;
+    VkBuffer source_buffer;
+    VkBuffer destination_buffer;
+    VkDeviceMemory source_memory;
+    VkDeviceMemory destination_memory;
+    uint32_t size = 12;
+    VkResult result;
 
-    //VkCommandBuffer command_buffer;
-    //VkBuffer source_buffer;
-    //VkBuffer destination_buffer;
-    //VkDeviceMemory source_memory;
-    //VkDeviceMemory destination_memory;
-    //uint32_t size = 10;
+    VkCommandBufferAllocateInfo cb_ci = { 0 };
+    cb_ci.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cb_ci.commandBufferCount = 1;
+    cb_ci.commandPool = device.command_pools[0];
+    result = vkAllocateCommandBuffers(device.device, &cb_ci, &command_buffer);
+    check_result(result, "Could not allocate command buffer!");
 
-    //VkCommandBufferAllocateInfo cb_ci = { 0 };
-    //cb_ci.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    //cb_ci.commandBufferCount = 1;
-    //cb_ci.commandPool = device.command_pools[0];
-    //vkAllocateCommandBuffers(device.device, &cb_ci, &command_buffer);
+    VkBufferCreateInfo b_ci = { 0 };
+    b_ci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    b_ci.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    b_ci.pQueueFamilyIndices = &device.queue_family_indices[0];
+    b_ci.queueFamilyIndexCount = 1;
+    b_ci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    b_ci.size = size;
+    result = vkCreateBuffer(device.device, &b_ci, NULL, &source_buffer);
+    check_result(result, "Could not create buffer!");
 
-    //VkBufferCreateInfo b_ci = { 0 };
-    //b_ci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    //b_ci.flags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-    //b_ci.pQueueFamilyIndices = &device.queue_family_indices[0];
-    //b_ci.queueFamilyIndexCount = 1;
-    //b_ci.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    //b_ci.size = size;
-    //vkCreateBuffer(device.device, &b_ci, NULL, &source_buffer);
+    b_ci.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    result = vkCreateBuffer(device.device, &b_ci, NULL, &destination_buffer);
+    check_result(result, "Could not create buffer!");
 
-    //b_ci.flags = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-    //vkCreateBuffer(device.device, &b_ci, NULL, &destination_buffer);
+    VkMemoryAllocateInfo m_ai = { 0 };
+    m_ai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    m_ai.allocationSize = size;
+    m_ai.memoryTypeIndex = device.host_visible_memory_index;
+    result = vkAllocateMemory(device.device, &m_ai, NULL, &source_memory);
+    check_result(result, "Could not allocate memory!");
 
-    //VkMemoryAllocateInfo m_ai = { 0 };
-    //m_ai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    //m_ai.allocationSize = size;
-    //m_ai.memoryTypeIndex
+    m_ai.memoryTypeIndex = device.device_local_memory_index;
+    result = vkAllocateMemory(device.device, &m_ai, NULL, &destination_memory);
+    check_result(result, "Could not allocate memory!");
 
-    //    vkDeviceMemory
+    result = vkBindBufferMemory(device.device, source_buffer, source_memory, 0);
+    check_result(result, "Could not bind buffer memory!");
+    result = vkBindBufferMemory(device.device, destination_buffer, destination_memory, 0);
+    check_result(result, "Could not bind buffer memory!");
 
-    //    vkBindBufferMemory()
-
-    //    vkMapMemory
-
+    vkFreeMemory(device.device, source_memory, NULL);
+    vkFreeMemory(device.device, destination_memory, NULL);
+    vkDestroyBuffer(device.device, source_buffer, NULL);
+    vkDestroyBuffer(device.device, destination_buffer, NULL);
 
 
 
