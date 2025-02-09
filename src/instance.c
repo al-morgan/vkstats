@@ -23,12 +23,17 @@ void vkstats_instance_create(vkstats_instance* instance)
 
     check_layer("VK_LAYER_KHRONOS_validation");
 
+    VkApplicationInfo application_info = { 0 };
+    application_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    application_info.apiVersion = VK_API_VERSION_1_3;
+
     instance_ci.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instance_ci.pNext = &debug_utils;
     instance_ci.enabledLayerCount = array_length(enabled_layers);
     instance_ci.ppEnabledLayerNames = enabled_layers;
     instance_ci.ppEnabledExtensionNames = enabled_extensions;
     instance_ci.enabledExtensionCount = array_length(enabled_extensions);
+    instance_ci.pApplicationInfo = &application_info;
     result = vkCreateInstance(&instance_ci, NULL, &instance->instance);
     check_result(result, "Could not create instance!");
 
@@ -41,7 +46,8 @@ void vkstats_instance_destroy(vkstats_instance* instance)
     vkDestroyInstance(instance->instance, NULL);
 }
 
-/* create_messenger()
+/*
+* create_messenger()
 *
 * Create a debug messenger.
 *
@@ -64,7 +70,8 @@ static VkDebugUtilsMessengerEXT create_messenger(VkInstance instance)
     return messenger;
 }
 
-/* destroy_messenger()
+/*
+* destroy_messenger()
 *
 * Destroy a debug messenger.
 *
@@ -79,7 +86,8 @@ static void destroy_messenger(VkInstance instance, VkDebugUtilsMessengerEXT mess
     vkDestroyDebugUtilsMessengerEXT(instance, messenger, NULL);
 }
 
-/* get_messenger_create_info()
+/*
+* get_messenger_create_info()
 *
 * Gets messenger data so it can be supplied during messenger creation as well
 * as instance creation.
@@ -97,7 +105,8 @@ VkDebugUtilsMessengerCreateInfoEXT get_messenger_create_info(void)
     return debug_utils;
 }
 
-/* debug_messenger()
+/*
+* debug_messenger()
 *
 * Debug messenger callback.
 *
@@ -116,7 +125,8 @@ VkBool32 debug_messenger(VkDebugUtilsMessageSeverityFlagBitsEXT severity, VkDebu
     return VK_FALSE;
 }
 
-/* check_layer()
+/*
+* check_layer()
 *
 * Ensures that a Vulkan layer is available. Aborts the application if not.
 *

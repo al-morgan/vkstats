@@ -9,7 +9,8 @@ typedef struct
     VkDebugUtilsMessengerEXT messenger;
 } vkstats_instance;
 
-/* vkstats_instance_create()
+/*
+* vkstats_instance_create()
 * 
 * Creates a vkstats_instance, which encapsulates the VkInstance.
 * 
@@ -17,7 +18,8 @@ typedef struct
 */
 void vkstats_instance_create(vkstats_instance *instance);
 
-/* vkstats_instance_create()
+/*
+* vkstats_instance_create()
 *
 * Destroys a vkstats_instance.
 *

@@ -14,6 +14,10 @@ add_executable(
     physical_device.h
     device.c
     device.h
+    stopwatch.c
+    stopwatch.h
+    experiments.c
+    experiments.h
 )
 
 target_include_directories(vkstats PRIVATE ${Vulkan_INCLUDE_DIRS})

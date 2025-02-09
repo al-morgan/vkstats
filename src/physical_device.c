@@ -4,7 +4,8 @@
 #include "util.h"
 #include "physical_device.h"
 
-/* get_physical_device()
+/*
+* get_physical_device()
 *
 * Gets a physical device based on the index into the physical device list.
 *
@@ -38,4 +39,5 @@ void vkstats_physical_device_get(vkstats_physical_device* physical_device, VkIns
     }
 
     vkGetPhysicalDeviceProperties(physical_device->physical_device, &physical_device->properties);
+    vkGetPhysicalDeviceMemoryProperties(physical_device->physical_device, &physical_device->memory_properties);
 }

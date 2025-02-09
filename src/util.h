@@ -7,7 +7,8 @@
 
 #include "vulkan/vulkan.h"
 
-/* array_length()
+/*
+* array_length()
 * 
 * Returns the number of elements in an array.
 * 
@@ -17,7 +18,8 @@
 */
 #define array_length(a) (sizeof(a) / sizeof(a[0]))
 
-/* clear_struct()
+/*
+* clear_struct()
 * 
 * Zero-initializes a struct.
 * 
@@ -25,7 +27,8 @@
 */
 #define clear_struct(s) memset(s, 0, sizeof(*s))
 
-/* fatal_error()
+/*
+* fatal_error()
 *
 * Displays a message and aborts the application.
 *
@@ -37,7 +40,8 @@ static void fatal_error(const char* message)
     exit(-1);
 }
 
-/* check_result()
+/*
+* check_result()
 *
 * Aborts the application if a result is not VK_SUCCESS.
 *
@@ -52,7 +56,8 @@ static void check_result(VkResult result, const char* message)
     }
 }
 
-/* count_flags()
+/*
+* count_flags()
 *
 * Counts the number of flags set.
 *

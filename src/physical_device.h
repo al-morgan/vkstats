@@ -5,11 +5,13 @@
 
 typedef struct
 {
-    VkPhysicalDevice physical_device;
-    VkPhysicalDeviceProperties properties;
+    VkPhysicalDevice                    physical_device;
+    VkPhysicalDeviceProperties          properties;
+    VkPhysicalDeviceMemoryProperties    memory_properties;
 } vkstats_physical_device;
 
-/* vkstats_physical_device_get()
+/*
+* vkstats_physical_device_get()
 *
 * Gets a physical device based on the index into the physical device list.
 *
