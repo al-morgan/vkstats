@@ -108,14 +108,27 @@ int main(int argc, char** argv)
 
         vkEndCommandBuffer(command_buffer);
 
+        uint64_t foo = i + 1;
+
+        VkTimelineSemaphoreSubmitInfo ts_si = { 0 };
+        ts_si.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+        ts_si.pWaitSemaphoreValues = &foo;
+        ts_si.waitSemaphoreValueCount = 1;
+        ts_si.pSignalSemaphoreValues = &foo;
+        ts_si.signalSemaphoreValueCount = 1;
+
+        VkPipelineStageFlags bar = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        
         VkSubmitInfo si = { 0 };
         si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        si.pNext = &ts_si;
         si.pCommandBuffers = &command_buffer;
         si.commandBufferCount = 1;
         si.pWaitSemaphores = &starter_pistol;
         si.waitSemaphoreCount = 1;
         si.pSignalSemaphores = &finish_line;
         si.signalSemaphoreCount = 1;
+        si.pWaitDstStageMask = &bar;
 
         LARGE_INTEGER start_time;
         LARGE_INTEGER end_time;
@@ -124,15 +137,21 @@ int main(int argc, char** argv)
 
         VkSemaphoreSignalInfo s_si = { 0 };
         s_si.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO;
-        //s_si.value
+        s_si.value = i + 1;
+        s_si.semaphore = starter_pistol;
 
+        VkSemaphoreWaitInfo s_wi = { 0 };
+        s_wi.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+        s_wi.pSemaphores = &finish_line;
+        s_wi.pValues = &foo;
+        s_wi.semaphoreCount = 1;
 
         QueryPerformanceCounter(&start_time);
-        //vkSignalSemaphore(device.device, &end_time.QuadPart);
-
+        vkSignalSemaphore(device.device, &s_si);
+        vkWaitSemaphores(device.device, &s_wi, UINT64_MAX);
         QueryPerformanceCounter(&end_time);
-
         vkDeviceWaitIdle(device.device);
+
 
         vkFreeMemory(device.device, source_memory, NULL);
         vkFreeMemory(device.device, destination_memory, NULL);
