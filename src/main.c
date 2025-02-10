@@ -120,7 +120,7 @@ int main(int argc, char** argv)
         LARGE_INTEGER start_time;
         LARGE_INTEGER end_time;
 
-        //vkQueueSubmit(device.queues[0], 1, &si, VK_NULL_HANDLE);
+        vkQueueSubmit(device.queues[0], 1, &si, VK_NULL_HANDLE);
 
         VkSemaphoreSignalInfo s_si = { 0 };
         s_si.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO;
