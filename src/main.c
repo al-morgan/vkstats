@@ -66,7 +66,7 @@ int main(int argc, char** argv)
     result = vkCreateSemaphore(device.device, &s_ci, NULL, &finish_line);
     check_result(result, "Could not create semaphore!");
 
-    for (uint32_t i = 0; i < 1000; i++)
+    for (uint32_t i = 0; i < 10000; i++)
     {
         size += 4;
 
@@ -152,6 +152,8 @@ int main(int argc, char** argv)
         QueryPerformanceCounter(&end_time);
         vkDeviceWaitIdle(device.device);
 
+        uint64_t elapsed = end_time.QuadPart - start_time.QuadPart;
+        printf("%d %d\n", size, (int)elapsed);
 
         vkFreeMemory(device.device, source_memory, NULL);
         vkFreeMemory(device.device, destination_memory, NULL);
