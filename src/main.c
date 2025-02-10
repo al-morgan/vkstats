@@ -160,7 +160,7 @@ int main(int argc, char** argv)
         vkDeviceWaitIdle(device.device);
 
         uint64_t elapsed = end_time.QuadPart - start_time.QuadPart;
-        printf("%u %u\n", (uint32_t)size, (int)elapsed);
+        printf("%u, %u\n", (uint32_t)size, (int)elapsed);
 
         vkFreeMemory(device.device, source_memory, NULL);
         vkFreeMemory(device.device, destination_memory, NULL);
