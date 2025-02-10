@@ -105,7 +105,9 @@ int main(int argc, char** argv)
         cb_bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
         vkBeginCommandBuffer(command_buffer, &cb_bi);
-
+        VkBufferCopy buffer_copy = { 0 };
+        buffer_copy.size = size;
+        vkCmdCopyBuffer(command_buffer, source_buffer, destination_buffer, 1, &buffer_copy);
         vkEndCommandBuffer(command_buffer);
 
         uint64_t foo = i + 1;
