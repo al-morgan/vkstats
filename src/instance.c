@@ -23,12 +23,17 @@ void vkstats_instance_create(vkstats_instance* instance)
 
     check_layer("VK_LAYER_KHRONOS_validation");
 
+    VkApplicationInfo application_info = { 0 };
+    application_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    application_info.apiVersion = VK_API_VERSION_1_3;
+
     instance_ci.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instance_ci.pNext = &debug_utils;
     instance_ci.enabledLayerCount = array_length(enabled_layers);
     instance_ci.ppEnabledLayerNames = enabled_layers;
     instance_ci.ppEnabledExtensionNames = enabled_extensions;
     instance_ci.enabledExtensionCount = array_length(enabled_extensions);
+    instance_ci.pApplicationInfo = &application_info;
     result = vkCreateInstance(&instance_ci, NULL, &instance->instance);
     check_result(result, "Could not create instance!");
 

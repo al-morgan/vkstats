@@ -78,8 +78,13 @@ void vkstats_device_builder_build(vkstats_device_builder* builder, vkstats_devic
         queue_create_infos[i].pQueuePriorities = &queue_priority;
     }
 
+    VkPhysicalDeviceVulkan12Features physical_device_features = { 0 };
+    physical_device_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+    physical_device_features.timelineSemaphore = VK_TRUE;
+
     VkDeviceCreateInfo create_info = { 0 };
     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    create_info.pNext = &physical_device_features;
     create_info.pQueueCreateInfos = queue_create_infos;
     create_info.queueCreateInfoCount = builder->queue_count;
 

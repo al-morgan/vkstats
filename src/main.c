@@ -55,7 +55,7 @@ int main(int argc, char** argv)
     check_result(result, "Could not allocate command buffer!");
 
     VkSemaphoreTypeCreateInfo st_ci = { 0 };
-    st_ci.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    st_ci.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
     st_ci.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
 
     VkSemaphoreCreateInfo s_ci = { 0 };
@@ -120,7 +120,7 @@ int main(int argc, char** argv)
         LARGE_INTEGER start_time;
         LARGE_INTEGER end_time;
 
-        vkQueueSubmit(device.queues[0], 1, &si, VK_NULL_HANDLE);
+        //vkQueueSubmit(device.queues[0], 1, &si, VK_NULL_HANDLE);
 
         VkSemaphoreSignalInfo s_si = { 0 };
         s_si.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO;
@@ -128,9 +128,9 @@ int main(int argc, char** argv)
 
 
         QueryPerformanceCounter(&start_time);
-        vkSignalSemaphore(device.device, &end_time);
+        //vkSignalSemaphore(device.device, &end_time.QuadPart);
 
-        //QueryPerformanceCounter(&end_time);
+        QueryPerformanceCounter(&end_time);
 
         vkDeviceWaitIdle(device.device);
 
