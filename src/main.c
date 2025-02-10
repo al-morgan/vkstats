@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     VkBuffer destination_buffer;
     VkDeviceMemory source_memory;
     VkDeviceMemory destination_memory;
-    uint32_t size = 12;
+    VkDeviceSize size = 12;
     VkResult result;
     VkSemaphore starter_pistol;
     VkSemaphore finish_line;
@@ -66,9 +66,14 @@ int main(int argc, char** argv)
     result = vkCreateSemaphore(device.device, &s_ci, NULL, &finish_line);
     check_result(result, "Could not create semaphore!");
 
-    for (uint32_t i = 0; i < 10000; i++)
+    size = 4;
+
+    uint64_t semaphore_value = 0;
+
+    //for (uint32_t i = 0; i < 10000; i++)
+    while(size < UINT64_C(6) * UINT64_C(1024) * UINT64_C(1024) * UINT64_C(1024))
     {
-        size += 4;
+        size *= 2;
 
         VkBufferCreateInfo b_ci = { 0 };
         b_ci.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -110,13 +115,13 @@ int main(int argc, char** argv)
         vkCmdCopyBuffer(command_buffer, source_buffer, destination_buffer, 1, &buffer_copy);
         vkEndCommandBuffer(command_buffer);
 
-        uint64_t foo = i + 1;
+        semaphore_value++;
 
         VkTimelineSemaphoreSubmitInfo ts_si = { 0 };
         ts_si.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
-        ts_si.pWaitSemaphoreValues = &foo;
+        ts_si.pWaitSemaphoreValues = &semaphore_value;
         ts_si.waitSemaphoreValueCount = 1;
-        ts_si.pSignalSemaphoreValues = &foo;
+        ts_si.pSignalSemaphoreValues = &semaphore_value;
         ts_si.signalSemaphoreValueCount = 1;
 
         VkPipelineStageFlags bar = VK_PIPELINE_STAGE_TRANSFER_BIT;
@@ -139,13 +144,13 @@ int main(int argc, char** argv)
 
         VkSemaphoreSignalInfo s_si = { 0 };
         s_si.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO;
-        s_si.value = i + 1;
+        s_si.value = semaphore_value;
         s_si.semaphore = starter_pistol;
 
         VkSemaphoreWaitInfo s_wi = { 0 };
         s_wi.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
         s_wi.pSemaphores = &finish_line;
-        s_wi.pValues = &foo;
+        s_wi.pValues = &semaphore_value;
         s_wi.semaphoreCount = 1;
 
         QueryPerformanceCounter(&start_time);
@@ -155,7 +160,7 @@ int main(int argc, char** argv)
         vkDeviceWaitIdle(device.device);
 
         uint64_t elapsed = end_time.QuadPart - start_time.QuadPart;
-        printf("%d %d\n", size, (int)elapsed);
+        printf("%u %u\n", (uint32_t)size, (int)elapsed);
 
         vkFreeMemory(device.device, source_memory, NULL);
         vkFreeMemory(device.device, destination_memory, NULL);
