@@ -202,7 +202,7 @@ void vkstats_experiment_queue_transfer_speed(vkstats_device *device, uint32_t qu
         elapsed = vkstats_stopwatch_stop(&stopwatch);
         vkDeviceWaitIdle(device->device);
 
-        printf("Uploading %u bytes: %.2fms\n", (uint32_t)size, elapsed);
+        printf("Uploading %u bytes: %.2f ms\n", (uint32_t)size, elapsed);
 
         vkFreeMemory(device->device, source_memory, NULL);
         vkFreeMemory(device->device, destination_memory, NULL);
